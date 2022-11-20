@@ -1,0 +1,5 @@
+beautifulsoup4==4.11.1
+Delorean~=1.0.0
+CairoSVG==2.5.2
+python-dotenv==0.21.0
+requests==2.25.1
