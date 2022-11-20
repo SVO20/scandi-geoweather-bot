@@ -49,7 +49,7 @@ while True:
                 text = text.lower()[1:]
                 if text == "start":
                     # '/start' command
-                    pass
+                    raise ExitBatmanArea
                 else:
                     # Unknown command
                     # feature! wrong slash-commands NOT deleted from chat
