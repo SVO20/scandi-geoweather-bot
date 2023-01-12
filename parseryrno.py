@@ -15,26 +15,29 @@ from time import sleep
 
 def get_weather(lat, lng):
     if not(lat and lng):
-        return vars.WRONG_STR, None
+        return "Wrong location given", None
 
     # TO SOUP prepare   yr_forecast_page
     yr_forecast_page = requests.get(vars.YR_FORECAST_URL.format(lat, lng)).text
     soup = BeautifulSoup(yr_forecast_page, "html.parser")
     tag_currw = soup.find('div', class_='now-hero__next-hour-content')  # soup for "current weather"
 
-    # PARSE "current weather" block to individual soups
-    s_currw_t = tag_currw.find('span', class_='temperature')  # soup  temperature <span>
-    s_currw_at = tag_currw.find('div', class_='feels-like-text')  # soup  feels like <div>
-    s_currw_p = tag_currw.find('span', class_='precipitation')  # soup  precipitation <span>
-    s_currw_alltext = tag_currw.findAll('div', class_='now-hero__next-hour-text')  # soup for wind by text
-
+    # PARSE "current weather" block
+    tag_currw_t = tag_currw.find('span', class_='temperature')  # temperature <span>
+    tag_currw_at = tag_currw.find('div', class_='feels-like-text')  # feels like <div>
     # INTERPRET to variables
-    text_temp = s_currw_t.get_text().replace('Temperature', 'Temperature ')  # temperature
-    text_feelslike = s_currw_at.get_text()  # feels like temperarure
-    text_precipitation = s_currw_p.get_text()  # precipitation (mm)
-    text_wind = " ".join([s.get_text()
-                          for s
-                          in s_currw_alltext[2].findAll("span", class_="nrk-sr")])  # wind by text
+    text_temp = tag_currw_t.get_text().replace('Temperature', 'Temperature ')  # temperature
+    text_feelslike = tag_currw_at.get_text()  # feels like temperarure
+
+    # Jan 2023 fix
+    tag_currw_nexthourtexts = tag_currw.findAll('div', class_='now-hero__next-hour-text')
+    # precipitation (mm) by text
+    text_precipitation = " ".join([t.get_text()
+                                   for t
+                                   in tag_currw_nexthourtexts[1].select("span")[0].findAll()])
+    text_precipitation = text_precipitation.replace("  ", " ")
+    # # wind by text
+    text_wind = tag_currw_nexthourtexts[2].select("span")[0].find("span").get_text()
 
     text_clouds = soup.find(class_="daily-weather-list-item__symbols"). \
         findChild(class_="weather-symbol__img")['alt']. \
