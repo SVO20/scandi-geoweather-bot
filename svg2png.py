@@ -3,6 +3,8 @@ import os
 import subprocess
 import traceback
 from time import sleep
+import re
+import cairosvg
 
 # Path to Inkscape.exe installed in Windows
 INKSCAPE_EXE_PATH = r"C:\Program Files\Inkscape\inkscape.exe"
@@ -11,16 +13,33 @@ INKSCAPE_EXE_PATH = r"C:\Program Files\Inkscape\inkscape.exe"
 SVG_SAMPLE = b"""<?xml version="1.0"?>              
     <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
       "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-    
+
     <svg xmlns="http://www.w3.org/2000/svg"
      width="467" height="462">
       <rect x="80" y="60" width="250" height="250" rx="20"
           style="fill:#ff0000; stroke:#000000;stroke-width:2px;" />
-      
+
       <rect x="140" y="120" width="250" height="250" rx="40"
           style="fill:#0000ff; stroke:#000000; stroke-width:2px;
           fill-opacity:0.7;" />
     </svg>"""
+
+
+def rem_to_pt(svg_bytes: bytes, base_font_size: float = 12.0) -> bytes:
+    """ Converts all font-size values from rem to pt in the SVG bytes """
+    svg_content = svg_bytes.decode('utf-8')
+
+    # Regex to find and replace rem values with pt
+    def convert_match(match):
+        rem_value = float(match.group(1))
+        pt_value = rem_value * base_font_size
+        return f'font-size: {pt_value:.2f}pt;'
+
+    # Replace all occurrences of rem in font-size
+    converted_content = re.sub(r'font-size:\s*([\d.]+)rem;', convert_match, svg_content)
+
+    # Return the modified content as bytes
+    return converted_content.encode('utf-8')
 
 
 def _svg2png_inkscape(bytes_svg: bytes,
@@ -71,12 +90,16 @@ try:
     if not sys.platform.startswith('win'):
         # LINUX
 
-        import cairosvg
-        # define svg2png() as cairosvg.svg2png() wrapper
+        # define svg2png() as cairosvg.svg2png() wrapper, also converting rem to pt
         def svg2png(bytes_svg: bytes):
-            """ Converts SVG bytes to PNG bytes on Linux by cairosvg
-            """
-            return cairosvg.svg2png(bytes_svg)
+            """ Converts SVG bytes to PNG bytes on Linux by cairosvg, also handling rem to pt conversion """
+
+            # First convert rem to pt in the SVG content
+            cleaned_svg_bytes = rem_to_pt(bytes_svg)
+
+            # Then use cairosvg to convert the cleaned SVG content to PNG
+            return cairosvg.svg2png(cleaned_svg_bytes)
+
     else:
         # WINDOWS
 
@@ -92,6 +115,7 @@ except Exception:
     def svg2png(bytes_svg: bytes):
         """ Dummy converter """
         return None
+
 
     SVG_OK = False
     print("SVG - FAILED")
