@@ -27,7 +27,33 @@ No forecast povider's API used, html parsed instead.
 3. If something went wrong, just ignore and make shure to stay alive
 4. Repeat forever
 
+
 ### Released
 `@scandi_geoweather_bot` is deployed on my server and it's exactly the same as this repo.
 
 Bot uptime since first beta in December 2020. [Try in Telegram](https://t.me/scandi_geoweather_bot)
+
+
+### Set up your own (with  `venv` )
+
+1. Ensure you have the API key from the Telegram bot @BotFather.
+2. It is optional, but would be good to have an API key from www.timezonedb.com to determine the local time by coordinates (it's free).
+3. Ensure you have the virtual environment service is installed in your version of Python:
+
+    `sudo apt install python3-venv`
+
+
+4. Run the following command on the server to clone source code:
+
+    `git clone https://github.com/SVO20/scandi-geoweather-bot && cd scandi-geoweather-bot`
+
+
+5. Create and activate a virtual environment:
+
+    `python3 -m venv env && source env/bin/activate`
+
+
+6. Run `sh install-and-setup.sh`. Input the Telegram bot API key (it will be verified), input the API key from www.timezonedb.com or skip step, and specify the image compression (size) for the weather chart – the default compression is already set to `0.8`.
+
+
+7. Run `sh run.sh`.
