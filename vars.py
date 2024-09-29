@@ -14,7 +14,7 @@ if getenv("TIMEDB_KEY") and getenv("TIMEDB_KEY") != "timedbkey":
 
 # scale by default (has effect only on Linux)
 SCALE = 0.8
-if getenv("SCALE") and getenv("SCALE") != "timedbkey":
+if getenv("SCALE"):
     SCALE = float(getenv("SCALE"))
 
 
